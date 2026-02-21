@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Championship Chess - Do You Have What It Takes?</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600&display=swap');
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        :root {
+            --bg-primary: #0a0a0f;
+            --bg-secondary: #12121a;
+            --bg-card: #1a1a24;
+            --gold: #d4a574;
+            --gold-bright: #f0c987;
+            --gold-dark: #8b6914;
+            --text-white: #f5f5f5;
+            --text-dim: #6a6a7a;
+            --light-square: #ecd9b9;
+            --dark-square: #ae8a68;
+            --highlight: rgba(212, 165, 116, 0.6);
+            --success: #4a9c6a;
+            --locked: #4a4a4a;
+        }
+        
+        body {
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            background: var(--bg-primary);
+            min-height: 100vh;
+            color: var(--text-white);
+        }
+
+        .screen { display: none; min-height: 100vh; padding: 40px 20px; }
+        .screen.active { display: flex; flex-direction: column; justify-content: center; align-items: center; }
+
+        #introScreen {
+            background: linear-gradient(180deg, #0a0a0f 0%, #1a0a2e 50%, #0a0a0f 100%);
+        }
+
+        .intro-card {
+            background: var(--bg-card);
+            border: 3px solid var(--gold);
+            border-radius: 12px;
+            padding: 50px;
+            max-width: 700px;
+            width: 100%;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.8);
+            text-align: center;
+        }
+
+        .intro-card h1 {
+            font-family: 'Cinzel', serif;
+            font-size: 3.5em;
+            margin-bottom: 20px;
+            color: var(--gold-bright);
+        }
+
+        .intro-subtitle {
+            font-size: 1.4em;
+            color: var(--gold);
+            margin-bottom: 40px;
+            font-style: italic;
+        }
+
+        .intro-story {
+            background: rgba(0, 0, 0, 0.4);
+            border-left: 4px solid var(--gold);
+            padding: 30px;
+            margin: 30px 0;
+            line-height: 1.8;
+            font-size: 1.1em;
+            color: var(--text-white);
+        }
+
+        .intro-story p {
+            margin-bottom: 20px;
+        }
+
+        .intro-story .highlight {
+            color: var(--gold-bright);
+            font-weight: 600;
+        }
+
+        .intro-challenge {
+            background: linear-gradient(135deg, rgba(212, 165, 116, 0.1), rgba(212, 165, 116, 0.05));
+            border: 2px solid var(--gold);
+            border-radius: 8px;
+            padding: 25px;
+            margin: 30px 0;
+            font-size: 1.3em;
+            font-family: 'Cinzel', serif;
+            color: var(--gold-bright);
+        }
+
+        .name-input-group {
+            margin: 30px 0;
+        }
+
+        .name-input-group input {
+            width: 100%;
+            padding: 15px;
+            background: var(--bg-secondary);
+            border: 2px solid var(--gold-dark);
+            color: var(--text-white);
+            font-family: 'Cormorant Garamond', Georgia, serif;
+            font-size: 1.2em;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .start-btn {
+            width: 100%;
+            padding: 18px;
+            font-size: 1.4em;
+            background: linear-gradient(135deg, var(--gold), var(--gold-bright));
+            color: #000;
+            border: none;
+            border-radius: 6px;
+            font-family: 'Cinzel', serif;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 20px;
+            text-transform: uppercase;
+        }
+
+        .start-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 40px rgba(240, 201, 135, 0.4);
+        }
+
+        #tournamentScreen {
+            background: linear-gradient(135deg, rgba(21, 21, 32, 0.95) 0%, rgba(26, 26, 38, 0.95) 100%);
+        }
+
+        .tournament-header {
+            text-align: center;
+            margin-bottom: 40px;
+            max-width: 700px;
+        }
+
+        .tournament-header h1 {
+            font-family: 'Cinzel', serif;
+            font-size: 2.8em;
+            color: var(--gold-bright);
+        }
+
+        .player-info {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 25px;
+            background: var(--bg-card);
+            border: 3px solid var(--gold);
+            border-radius: 8px;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .player-avatar {
+            font-size: 4em;
+            margin: 15px 0;
+        }
+
+        .player-name {
+            font-family: 'Cinzel', serif;
+            font-size: 2em;
+            color: var(--gold-bright);
+        }
+
+        .player-stats {
+            font-size: 1.1em;
+            color: var(--text-dim);
+            margin-top: 15px;
+        }
+
+        .tournament-bracket {
+            max-width: 800px;
+            width: 100%;
+            margin-bottom: 40px;
+        }
+
+        .bracket-title {
+            font-family: 'Cinzel', serif;
+            font-size: 1.6em;
+            color: var(--gold-bright);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .opponent-list {
+            display: grid;
+            gap: 15px;
+        }
+
+        .opponent-card {
+            background: var(--bg-card);
+            border: 3px solid;
+            border-radius: 8px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .opponent-card.locked {
+            border-color: var(--locked);
+            opacity: 0.4;
+            cursor: not-allowed;
+            background: rgba(20, 20, 30, 0.8);
+        }
+
+        .opponent-card.bronze { border-color: #cd7f32; }
+        .opponent-card.silver { border-color: #c0c0c0; }
+        .opponent-card.gold { border-color: #ffd700; }
+        .opponent-card.champ { border-color: #a855f7; }
+
+        .opponent-card:not(.locked):hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(212, 165, 116, 0.4);
+        }
+
+        .opponent-info {
+            flex: 1;
+        }
+
+        .opponent-avatar {
+            font-size: 2.5em;
+            margin-right: 15px;
+            display: inline-block;
+        }
+
+        .opponent-name {
+            font-family: 'Cinzel', serif;
+            font-size: 1.2em;
+            color: var(--gold);
+            margin-bottom: 5px;
+        }
+
+        .opponent-circuit {
+            font-size: 0.9em;
+            color: var(--text-dim);
+        }
+
+        .opponent-status {
+            text-align: right;
+            font-size: 0.95em;
+            font-weight: 600;
+        }
+
+        .status-won {
+            color: var(--success);
+        }
+
+        .status-locked {
+            color: var(--locked);
+        }
+
+        .status-available {
+            color: var(--gold-bright);
+        }
+
+        .world-records {
+            max-width: 600px;
+            width: 100%;
+            margin-top: 40px;
+            background: var(--bg-card);
+            border: 3px solid var(--gold);
+            border-radius: 8px;
+            padding: 30px;
+        }
+
+        .records-title {
+            font-family: 'Cinzel', serif;
+            font-size: 1.5em;
+            color: var(--gold-bright);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .record-entry {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 0;
+            border-bottom: 1px solid var(--gold-dark);
+        }
+
+        .record-entry:last-child {
+            border-bottom: none;
+        }
+
+        .record-rank {
+            font-family: 'Cinzel', serif;
+            color: var(--gold-bright);
+            font-weight: 700;
+            width: 50px;
+        }
+
+        .record-player {
+            flex: 1;
+            color: var(--text-white);
+        }
+
+        .record-score {
+            color: var(--gold);
+            font-weight: 600;
+        }
+
+        #gameScreen {
+            background: linear-gradient(135deg, rgba(21, 21, 32, 0.95) 0%, rgba(26, 26, 38, 0.95) 100%);
+        }
+
+        .game-container {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 30px;
+            max-width: 1050px;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 0;
+            background: var(--dark-square);
+            border: 4px solid var(--gold);
+            padding: 5px;
+            border-radius: 8px;
+        }
+
+        .square {
+            aspect-ratio: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.5em;
+            cursor: pointer;
+        }
+
+        .square.light { background: var(--light-square); color: #333; }
+        .square.dark { background: var(--dark-square); color: #f5f5f5; }
+
+        .sidebar {
+            background: var(--bg-card);
+            border: 3px solid var(--gold);
+            border-radius: 12px;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .opponent-info-game {
+            text-align: center;
+            border-bottom: 2px solid var(--gold-dark);
+            padding-bottom: 15px;
+        }
+
+        .opponent-info-game .avatar {
+            font-size: 3.5em;
+            margin: 10px 0;
+        }
+
+        .opponent-info-game .name {
+            font-family: 'Cinzel', serif;
+            font-size: 1.4em;
+            color: var(--gold-bright);
+        }
+
+        .dialogue {
+            background: var(--bg-secondary);
+            border: 2px solid var(--gold-dark);
+            border-radius: 6px;
+            padding: 18px;
+            min-height: 100px;
+            font-size: 0.95em;
+            line-height: 1.5;
+            color: var(--text-white);
+        }
+
+        .dialogue-speaker {
+            color: var(--gold-bright);
+            font-family: 'Cinzel', serif;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .win-btn {
+            padding: 12px;
+            background: linear-gradient(135deg, var(--gold), var(--gold-bright));
+            color: #000;
+            border: none;
+            border-radius: 6px;
+            font-family: 'Cinzel', serif;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .win-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(240, 201, 135, 0.3);
+        }
+
+        @media (max-width: 1024px) {
+            .game-container { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <!-- INTRO SCREEN -->
+    <div id="introScreen" class="screen active">
+        <div class="intro-card">
+            <h1>CHAMPIONSHIP CHESS</h1>
+            <p class="intro-subtitle">Do You Have What It Takes?</p>
+
+            <div class="intro-story">
+                <p>I don't know why you're here.</p>
+                <p>We took one look at you and thought... <span class="highlight">maybe.</span></p>
+                <p>Seven opponents stand between you and the championship. Seven players who have crushed everyone before them.</p>
+                <p>The weakest first. <span class="highlight">Beat them.</span></p>
+                <p>If you survive, you'll face the next. Then the next. And the next.</p>
+                <p>But can you really do this? <span class="highlight">Do you have what it takes to become the Master? The Champion? The undefeated?</span></p>
+                <p style="margin-top: 30px; color: var(--gold-bright);">Only one way to find out.</p>
+            </div>
+
+            <div class="intro-challenge">
+                What is your name, challenger?
+            </div>
+
+            <div class="name-input-group">
+                <input type="text" id="playerName" placeholder="Enter your name...">
+            </div>
+
+            <button class="start-btn" onclick="beginChallenge()">ACCEPT THE CHALLENGE</button>
+        </div>
+    </div>
+
+    <!-- TOURNAMENT SCREEN -->
+    <div id="tournamentScreen" class="screen">
+        <div class="tournament-header">
+            <h1>CHAMPIONSHIP TOURNAMENT</h1>
+        </div>
+
+        <div class="player-info">
+            <div class="player-avatar" id="playerAvatarDisplay"></div>
+            <div class="player-name" id="playerNameDisplay"></div>
+            <div class="player-stats" id="playerStats">Wins: 0/7</div>
+        </div>
+
+        <div class="tournament-bracket">
+            <div class="bracket-title">The Gauntlet</div>
+            <div class="opponent-list" id="opponentList"></div>
+        </div>
+
+        <div class="world-records">
+            <div class="records-title">WORLD RECORDS</div>
+            <div id="worldRecordsList"></div>
+        </div>
+    </div>
+
+    <!-- GAME SCREEN -->
+    <div id="gameScreen" class="screen">
+        <div class="game-container">
+            <div>
+                <div class="board" id="board"></div>
+                <div style="text-align: center; margin-top: 20px;">
+                    <p style="color: var(--gold); font-family: 'Cinzel', serif; font-size: 1.2em;">
+                        <span id="playerDisplay"></span> vs <span id="opponentDisplay"></span>
+                    </p>
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <div class="opponent-info-game">
+                    <div class="avatar" id="opponentAvatar"></div>
+                    <div class="name" id="opponentName"></div>
+                </div>
+
+                <div class="dialogue" id="dialogue">
+                    <div id="dialogueText">The match awaits...</div>
+                </div>
+
+                <button class="win-btn" onclick="winMatch()">Win This Match</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const AVATARS = ["⚔️", "👑", "🧙", "🎭", "🌟", "⚡", "🔮", "🏆"];
+
+        const OPPONENTS = [
+            {
+                id: "timmy",
+                name: "Timmy Tumbles",
+                circuit: "bronze",
+                avatar: "🤷",
+                rating: 400,
+                message: "I'm ready! Let's play!"
+            },
+            {
+                id: "betty",
+                name: "Betty Blunder",
+                circuit: "bronze",
+                avatar: "😅",
+                rating: 500,
+                message: "Oops, here we go!"
+            },
+            {
+                id: "pete",
+                name: "Old Pete",
+                circuit: "bronze",
+                avatar: "👴",
+                rating: 700,
+                message: "Ah, a challenger! Back in my day..."
+            },
+            {
+                id: "carlos",
+                name: "Carlos Triple Shot",
+                circuit: "silver",
+                avatar: "☕",
+                rating: 950,
+                message: "LETSGOLETSGO! Caffeine power!"
+            },
+            {
+                id: "sasha",
+                name: "Sasha Stratanova",
+                circuit: "silver",
+                avatar: "🧊",
+                rating: 1150,
+                message: "I have calculated your defeat."
+            },
+            {
+                id: "chen",
+                name: "Master Chen Wei",
+                circuit: "gold",
+                avatar: "🐉",
+                rating: 1550,
+                message: "The dragon has awakened."
+            },
+            {
+                id: "magnus",
+                name: "Marcus The Mind",
+                circuit: "champ",
+                avatar: "🧠",
+                rating: 2100,
+                message: "So you made it here. Impressive."
+            }
+        ];
+
+        const WORLD_RECORDS = [
+            { rank: 1, player: "The Undefeated", wins: 7 },
+            { rank: 2, player: "Dragon Slayer", wins: 7 },
+            { rank: 3, player: "The Challenger", wins: 6 },
+            { rank: 4, player: "Chess Master", wins: 6 },
+            { rank: 5, player: "The Mind", wins: 5 }
+        ];
+
+        let gameState = {
+            player: null,
+            playerAvatar: null,
+            opponent: null,
+            board: [],
+            wins: [],
+            moveCount: 0
+        };
+
+        function beginChallenge() {
+            const playerName = document.getElementById("playerName").value.trim();
+            if (!playerName) {
+                alert("Enter your name, challenger!");
+                return;
+            }
+
+            gameState.playerAvatar = AVATARS[Math.floor(Math.random() * AVATARS.length)];
+            gameState.player = { name: playerName, avatar: gameState.playerAvatar };
+            gameState.wins = [];
+            
+            document.getElementById("introScreen").classList.remove("active");
+            document.getElementById("tournamentScreen").classList.add("active");
+            
+            displayTournament();
+        }
+
+        function displayTournament() {
+            document.getElementById("playerAvatarDisplay").textContent = gameState.player.avatar;
+            document.getElementById("playerNameDisplay").textContent = gameState.player.name;
+            document.getElementById("playerStats").textContent = "Wins: " + gameState.wins.length + "/7";
+            
+            const opponentList = document.getElementById("opponentList");
+            opponentList.innerHTML = "";
+            
+            OPPONENTS.forEach(function(opp, index) {
+                const card = document.createElement("div");
+                const isWon = gameState.wins.includes(opp.id);
+                const isLocked = index > 0 && !gameState.wins.includes(OPPONENTS[index-1].id) && !isWon;
+                
+                card.className = "opponent-card " + opp.circuit + (isLocked ? " locked" : "");
+                
+                let status = "";
+                if (isWon) {
+                    status = '<div class="opponent-status"><span class="status-won">CHECK DEFEATED</span></div>';
+                } else if (isLocked) {
+                    status = '<div class="opponent-status"><span class="status-locked">LOCKED</span></div>';
+                } else {
+                    status = '<div class="opponent-status"><span class="status-available">AVAILABLE</span></div>';
+                }
+                
+                card.innerHTML = '<div class="opponent-info"><div class="opponent-avatar">' + opp.avatar + '</div><div><div class="opponent-name">' + opp.name + '</div><div class="opponent-circuit">' + opp.circuit.toUpperCase() + ' Rating: ' + opp.rating + '</div></div></div>' + status;
+                
+                if (!isLocked) {
+                    card.style.cursor = "pointer";
+                    card.onclick = function() { startGame(opp); };
+                }
+                
+                opponentList.appendChild(card);
+            });
+            
+            displayWorldRecords();
+        }
+
+        function displayWorldRecords() {
+            const recordsList = document.getElementById("worldRecordsList");
+            recordsList.innerHTML = "";
+            
+            WORLD_RECORDS.forEach(function(record) {
+                const entry = document.createElement("div");
+                entry.className = "record-entry";
+                entry.innerHTML = '<div class="record-rank">#' + record.rank + '</div><div class="record-player">' + record.player + '</div><div class="record-score">' + record.wins + ' Wins</div>';
+                recordsList.appendChild(entry);
+            });
+        }
+
+        function startGame(opponent) {
+            gameState.opponent = opponent;
+            gameState.moveCount = 0;
+            
+            document.getElementById("tournamentScreen").classList.remove("active");
+            document.getElementById("gameScreen").classList.add("active");
+            
+            document.getElementById("playerDisplay").textContent = gameState.player.avatar + " " + gameState.player.name;
+            document.getElementById("opponentDisplay").textContent = opponent.avatar + " " + opponent.name;
+            document.getElementById("opponentAvatar").textContent = opponent.avatar;
+            document.getElementById("opponentName").textContent = opponent.name;
+            
+            initializeBoard();
+            document.getElementById("dialogueText").innerHTML = '<div class="dialogue-speaker">' + opponent.name + '</div>' + opponent.message;
+        }
+
+        function initializeBoard() {
+            gameState.board = [
+                ["r", "n", "b", "q", "k", "b", "n", "r"],
+                ["p", "p", "p", "p", "p", "p", "p", "p"],
+                [null, null, null, null, null, null, null, null],
+                [null, null, null, null, null, null, null, null],
+                [null, null, null, null, null, null, null, null],
+                [null, null, null, null, null, null, null, null],
+                ["P", "P", "P", "P", "P", "P", "P", "P"],
+                ["R", "N", "B", "Q", "K", "B", "N", "R"]
+            ];
+            renderBoard();
+        }
+
+        function renderBoard() {
+            const boardEl = document.getElementById("board");
+            boardEl.innerHTML = "";
+            
+            for (let r = 0; r < 8; r++) {
+                for (let c = 0; c < 8; c++) {
+                    const square = document.createElement("div");
+                    const isLight = (r + c) % 2 === 0;
+                    square.className = "square " + (isLight ? "light" : "dark");
+                    
+                    const piece = gameState.board[r][c];
+                    if (piece) {
+                        const emojis = {
+                            "K": "♔", "Q": "♕", "R": "♖", "B": "♗", "N": "♘", "P": "♙",
+                            "k": "♚", "q": "♛", "r": "♜", "b": "♝", "n": "♞", "p": "♟"
+                        };
+                        square.textContent = emojis[piece] || "";
+                    }
+                    
+                    boardEl.appendChild(square);
+                }
+            }
+        }
+
+        function winMatch() {
+            gameState.wins.push(gameState.opponent.id);
+            document.getElementById("gameScreen").classList.remove("active");
+            document.getElementById("tournamentScreen").classList.add("active");
+            displayTournament();
+            
+            if (gameState.wins.length === 7) {
+                alert("CHAMPION! " + gameState.player.name + ", you have become the Master!");
+            }
+        }
+    </script>
+</body>
+</html>
